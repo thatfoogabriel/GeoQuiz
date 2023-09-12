@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val quizViewModel: QuizViewModel by viewModels()
+    private var isPreviousButtonVisible = false
 
     private var questionsAnswered = 0
     private var score = 0
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         val d = Log.d(TAG, "Got a QuizViewModel: $quizViewModel")
         totalQuestions = quizViewModel.questionBank.size
+        questionsAnswered = quizViewModel.questionsAnswered
 
         binding.trueButton.setOnClickListener { view: View ->
             if (!answered)
@@ -67,7 +69,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updatePreviousButtonVisibility() {
-        if (quizViewModel.currentIndex == 0) {
+        if (quizViewModel.currentIndex == 0 || quizViewModel.questionsAnswered == 0) {
             binding.previousButton.visibility = View.GONE // Hide the button at the first question
         } else {
             binding.previousButton.visibility = View.VISIBLE // Show the button for other questions
@@ -93,8 +95,7 @@ class MainActivity : AppCompatActivity() {
             userAnswer == correctAnswer -> R.string.correct_toast
             else -> R.string.incorrect_toast
         }
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
-            .show()
+        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
 
         binding.trueButton.isEnabled = false
         binding.falseButton.isEnabled = false
@@ -103,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             score++
         }
         questionsAnswered++
+        quizViewModel.questionsAnswered = questionsAnswered
 
         if (questionsAnswered == totalQuestions) {
             binding.nextButton.isEnabled = false
@@ -119,7 +121,6 @@ class MainActivity : AppCompatActivity() {
     private fun showQuizResult() {
         val percentage = (score.toDouble() / totalQuestions.toDouble()) * 100
         val resultMessage = getString(R.string.score_message, percentage)
-        Toast.makeText(this, resultMessage, Toast.LENGTH_LONG)
-            .show()
+        Toast.makeText(this, resultMessage, Toast.LENGTH_LONG).show()
     }
 }
